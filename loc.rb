@@ -11,7 +11,7 @@ if ARGV.count != 1
   exit 1
 end
 
-Dotenv.load
+Dotenv.load('secrets.env')
 
 def cloc(*args)
   cloc_path = Cliver.detect! 'cloc'
@@ -29,10 +29,12 @@ unless ENV['GITHUB_ENTERPRISE_URL'].nil?
   end
 end
 
-client = Octokit::Client.new access_token: ENV['GITHUB_TOKEN']
+client = Octokit::Client.new(:access_token => ENV['GITHUB_TOKEN'])
+#client = Octokit::Client.new access_token: ENV['GITHUB_TOKEN']
 client.auto_paginate = true
 
-repos = client.organization_repositories(ARGV[0].strip, type: 'sources')
+# change type: 'private' for all org private repo
+repos = client.repos({}, query: {type: 'owner', sort: 'asc'})
 puts "Found #{repos.count} repos. Counting..."
 
 reports = []
